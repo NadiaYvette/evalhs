@@ -1,0 +1,182 @@
+#!/usr/bin/env -S runhaskell --ghc-arg="-package process"
+{-# LANGUAGE BlockArguments #-}
+{-# LANGUAGE PackageImports #-}
+module Main (main) where
+import                     Control.Monad (when)
+import                     Data.Function ((&))
+import                     Data.Functor ((<&>))
+import qualified           Data.List as List (intercalate, intersperse, nub)
+import qualified           System.Environment as Env (getArgs, getEnv)
+import qualified "process" System.Process as Proc (callCommand)
+
+{-
+ - This is just to help set up the environment for using Haskell at the
+ - shell in a way. e.g.
+
+zsh: suspended  vi /home/nyc/.local/bin/runghcstk
+[nyc@nyc-thinkpad]~/src/tuple-sop% !rung
+runghcstk 'lines <$> readFile "src/Data/Tuple/Ops.hs" >>= print . intercalate ", " . mapMaybe \ell -> matchedText $ ell ?=~ [re|(?<=^type family\s)[A-Z][A-Za-z0-9_]*(?=\s{1,})|]'
+"ToNP, Lit, AreProducts, LengthT, GLengthT, Applicable, ApplicableN, InsLoc, If, Head, Tail, Diff, Reverse, ToFun, AreEqual, LEQ, Relation, ToTuple"
+[nyc@nyc-thinkpad]~/src/tuple-sop% 
+
+ - I'm foggy about how to make a script literate but anyhow.
+ -}
+
+pkgs :: [String]
+pkgs = [ "assoc"
+       , "base-orphans"
+       , "bifunctors"
+       , "call-stack"
+       , "contravariant"
+       , "comonad"
+       , "composition-extra"
+       , "distributive"
+       , "free"
+       , "indexed-traversable"
+       , "indexed-traversable-instances"
+       , "kan-extensions"
+       , "lens"
+       , "monads-tf"
+       , "parallel"
+       , "parsec"
+       , "profunctors"
+       , "reflection"
+       , "regex-with-pcre"
+       , "semigroupoids"
+       , "split"
+       , "StateVar"
+       , "strict"
+       , "tagged"
+       , "text"
+       , "th-abstraction"
+       , "these"
+       , "time"
+       , "transformers-compat"
+       , "unix"
+       , "vector" ]
+  & List.nub
+  & concatMap \s -> ["--package", s]
+
+exts :: [String]
+exts = [ "GHC2024"
+       , "AllowAmbiguousTypes"
+       , "ApplicativeDo"
+       , "Arrows"
+       , "BlockArguments"
+       , "ConstrainedClassMethods"
+       , "ConstraintKinds"
+       , "DataKinds"
+       , "DeriveAnyClass"
+       , "DeriveDataTypeable"
+       , "DeriveFoldable"
+       , "DeriveFunctor"
+       , "DeriveGeneric"
+       , "DeriveLift"
+       , "DeriveTraversable"
+       , "DerivingStrategies"
+       , "DerivingVia"
+       , "FlexibleContexts"
+       , "FlexibleInstances"
+       , "GADTs"
+       , "GeneralisedNewtypeDeriving"
+       , "ImpredicativeTypes"
+       , "InstanceSigs"
+       , "KindSignatures"
+       , "LambdaCase"
+       , "MonadComprehensions"
+       , "MultiWayIf"
+       , "NoMonomorphismRestriction"
+       , "OverloadedLabels"
+       , "OverloadedLists"
+       , "OverloadedStrings"
+       , "PackageImports"
+       , "ParallelListComp"
+       , "PartialTypeSignatures"
+       , "PatternGuards"
+       , "PolyKinds"
+       , "QualifiedDo"
+       , "QuantifiedConstraints"
+       , "QuasiQuotes"
+       , "RankNTypes"
+       , "RecordWildCards"
+       , "RecursiveDo"
+       , "RoleAnnotations"
+       , "ScopedTypeVariables"
+       , "StandaloneDeriving"
+       , "StandaloneKindSignatures"
+       , "TemplateHaskell"
+       , "TemplateHaskellQuotes"
+       , "TupleSections"
+       , "TypeAbstractions"
+       , "TypeFamilyDependencies"
+       , "TypeOperators"
+       , "TypeSynonymInstances"
+       , "UnicodeSyntax"
+       , "ViewPatterns" ]
+  <&> ("-X" <>)
+
+mkImp :: (Maybe String, String, Maybe String, [String]) -> [String]
+mkImp (mPkg, mod, mQual, hides) =
+  ["import"] <> maybe [] (\pkg -> ["\"" <> pkg <> "\""]) mPkg
+             <> [mod]
+             <> maybe [] (\qual -> ["qualified", "as", qual]) mQual
+             <> case hides of
+                  [] -> []
+                  _ : _ -> ["hiding ("] <> List.intersperse "," hides <> [")"]
+
+imps :: [String]
+imps = [ (Nothing, "Control.Applicative", Nothing, [])
+       , (Nothing, "Control.Arrow", Nothing, [])
+       , (Nothing, "Control.Lens", Nothing, ["re"])
+       , (Nothing, "Control.Lens.Operators", Nothing, [])
+       , (Nothing, "Control.Monad", Nothing, [])
+       , (Nothing, "Data.Either", Nothing, [])
+       , (Nothing, "Data.Function", Nothing, [])
+       , (Just "composition-extra", "Data.Function.Syntax", Nothing, [])
+       , (Nothing, "Data.Functor", Nothing, [])
+       , (Just "composition-extra", "Data.Functor.Syntax", Nothing, [])
+       , (Nothing, "Data.Kind", Nothing, [])
+       , (Nothing, "Data.List", Nothing, ["elem", "intercalate", "length", "lines", "words"])
+       , (Nothing, "Data.List", Just "List", [])
+       , (Nothing, "Data.Maybe", Nothing, [])
+       , (Nothing, "Prelude", Nothing, ["getContents", "lines", "putStrLn", "readFile", "words"])
+       , (Nothing, "Data.Proxy", Nothing, [])
+       , (Just "monads-tf", "Control.Monad.Cont", Nothing, [])
+       , (Just "monads-tf", "Control.Monad.Cont.Class", Nothing, [])
+       , (Just "monads-tf", "Control.Monad.Except", Nothing, [])
+       , (Just "monads-tf", "Control.Monad.Except.Class", Nothing, [])
+       , (Just "monads-tf", "Control.Monad.Identity", Nothing, [])
+       , (Just "monads-tf", "Control.Monad.RWS", Nothing, [])
+       , (Just "monads-tf", "Control.Monad.RWS.Class", Nothing, [])
+       , (Just "monads-tf", "Control.Monad.Reader", Nothing, [])
+       , (Just "monads-tf", "Control.Monad.Reader.Class", Nothing, [])
+       , (Just "monads-tf", "Control.Monad.State", Nothing, [])
+       , (Just "monads-tf", "Control.Monad.State.Class", Nothing, [])
+       , (Just "monads-tf", "Control.Monad.Trans", Nothing, [])
+       , (Just "monads-tf", "Control.Monad.Writer", Nothing, [])
+       , (Just "monads-tf", "Control.Monad.Writer.Class", Nothing, [])
+       , (Just "regex-with-pcre", "Text.RE.PCRE.Text", Nothing, [])
+       , (Just "split", "Data.List.Split", Just "Split", [])
+       , (Just "text", "Data.Text", Nothing, ["elem", "filter", "length", "map"])
+       , (Just "text", "Data.Text", Just "Text", [])
+       , (Just "text", "Data.Text.IO", Nothing, [])
+       , (Just "text", "Data.Text.IO", Just "Text", [])]
+  <&> \t4@(_, _, _, _) -> "-e \'" <> unwords (mkImp t4) <> "\'"
+
+debug :: Bool
+debug = False
+
+main :: IO ()
+main = do
+  args <- Env.getArgs
+  home <- Env.getEnv "HOME"
+  let cmd, execOpts, newArgs, stkOpts, yaml :: [String]
+      newArgs = ["-e", "\'" <> List.intercalate " " args <> "\'"]
+      yaml = ["--stack-yaml", home <> "/.stack/global-project/stack.yaml"]
+      cmd = ["stack"] <> yaml <> stkOpts <> ["exec"] <> execOpts <> ["ghc"] <> pkgs <> ["--"] <> exts <> imps <> newArgs
+      execOpts = ["--trace"]
+      stkOpts = ["--compiler ghc-9.10.1", "--jobs 256", "--keep-going", "--prefetch"]
+      cmd' :: String = unwords cmd
+  when debug do
+    putStrLn cmd'
+  Proc.callCommand cmd'
