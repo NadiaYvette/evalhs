@@ -30,13 +30,17 @@ pkgs = [ "assoc"
        , "contravariant"
        , "comonad"
        , "composition-extra"
+       , "containers"
+       , "directory"
        , "distributive"
+       , "extra"
        , "free"
        , "indexed-traversable"
        , "indexed-traversable-instances"
        , "kan-extensions"
        , "lens"
        , "monads-tf"
+       , "nonempty-containers"
        , "parallel"
        , "parsec"
        , "profunctors"
@@ -125,29 +129,53 @@ mkImp (mPkg, mod, mQual, hides) =
                   _ : _ -> ["hiding ("] <> List.intersperse "," hides <> [")"]
 
 imps :: [String]
-imps = [ (Nothing, "Control.Applicative", Nothing, [])
-       , (Nothing, "Control.Arrow", Nothing, [])
-       , (Nothing, "Control.Lens", Nothing, ["re"])
-       , (Nothing, "Control.Lens.Operators", Nothing, [])
-       , (Nothing, "Control.Monad", Nothing, [])
-       , (Nothing, "Data.Either", Nothing, [])
-       , (Nothing, "Data.Function", Nothing, [])
+imps = [ (Just "base", "Control.Applicative", Nothing, [])
+       , (Just "base", "Control.Arrow", Nothing, [])
+       , (Just "base", "Control.Monad", Nothing, [])
+       , (Just "base", "Control.Monad", Just "Monad", [])
+       , (Just "base", "Data.Char", Just "Char", [])
+       , (Just "base", "Data.Functor", Nothing, [])
+       , (Just "base", "Data.Either", Nothing, [])
+       , (Just "base", "Data.Foldable", Nothing, [])
+       , (Just "base", "Data.Foldable1", Nothing, [])
+       , (Just "base", "Data.Function", Nothing, [])
+       , (Just "base", "Data.Kind", Nothing, [])
+       , (Just "base", "Data.List", Nothing, ["elem", "intercalate", "length", "lines", "words"])
+       , (Just "base", "Data.List", Just "List", [])
+       , (Just "base", "Data.List.NonEmpty", Nothing, ["elem", "intercalate", "length", "lines", "words"])
+       , (Just "base", "Data.List.NonEmpty", Just "NonEmpty", [])
+       , (Just "base", "Data.Maybe", Nothing, [])
+       , (Just "base", "Data.Maybe", Just "Maybe", [])
        , (Just "composition-extra", "Data.Function.Syntax", Nothing, [])
-       , (Nothing, "Data.Functor", Nothing, [])
        , (Just "composition-extra", "Data.Functor.Syntax", Nothing, [])
-       , (Nothing, "Data.Kind", Nothing, [])
-       , (Nothing, "Data.List", Nothing, ["elem", "intercalate", "length", "lines", "words"])
-       , (Nothing, "Data.List", Just "List", [])
-       , (Nothing, "Data.Maybe", Nothing, [])
-       , (Nothing, "Prelude", Nothing, ["getContents", "lines", "putStrLn", "readFile", "words"])
+       , (Just "extra", "Control.Monad.Extra", Just "Monad", [])
+       , (Just "extra", "Data.Either.Extra", Just "Either", [])
+       , (Just "extra", "Data.Foldable.Extra", Nothing, [])
+       , (Just "filepath", "System.FilePath", Just "FilePath", [])
+       , (Just "containers", "Data.Graph", Just "Graph", [])
+       , (Just "containers", "Data.Map", Just "Map", [])
+       , (Just "containers", "Data.Sequence", Just "Seq", [])
+       , (Just "containers", "Data.Set", Just "Set", [])
+       , (Just "containers", "Data.Tree", Just "Tree", [])
+       , (Just "directory", "System.Directory", Just "Dir", [])
+       , (Just "nonempty-containers", "Data.Map.NonEmpty", Just "NEMap", [])
+       , (Just "nonempty-containers","Data.Sequence.NonEmpty",Just "NESeq",[])
+       , (Just "nonempty-containers", "Data.Set.NonEmpty", Just "NESet", [])
+       , (Just "unix", "System.Posix", Just "Unix", [])
+       , (Nothing, "Prelude", Nothing
+                 , ["getContents", "lines", "putStrLn", "readFile", "words"])
        , (Nothing, "Data.Proxy", Nothing, [])
+       , (Nothing, "System.Environment", Just "Env", [])
+       , (Nothing, "System.IO", Just "IO", [])
+       , (Just "lens", "Control.Lens", Nothing, ["re"])
+       , (Just "lens", "Control.Lens.Operators", Nothing, [])
        , (Just "monads-tf", "Control.Monad.Cont", Nothing, [])
        , (Just "monads-tf", "Control.Monad.Cont.Class", Nothing, [])
        , (Just "monads-tf", "Control.Monad.Except", Nothing, [])
        , (Just "monads-tf", "Control.Monad.Except.Class", Nothing, [])
        , (Just "monads-tf", "Control.Monad.Identity", Nothing, [])
-       , (Just "monads-tf", "Control.Monad.RWS", Nothing, [])
-       , (Just "monads-tf", "Control.Monad.RWS.Class", Nothing, [])
+       , (Just "monads-tf", "Control.Monad.RWS", Just "RWS", [])
+       , (Just "monads-tf", "Control.Monad.RWS.Class", Just "RWS", [])
        , (Just "monads-tf", "Control.Monad.Reader", Nothing, [])
        , (Just "monads-tf", "Control.Monad.Reader.Class", Nothing, [])
        , (Just "monads-tf", "Control.Monad.State", Nothing, [])
@@ -155,7 +183,9 @@ imps = [ (Nothing, "Control.Applicative", Nothing, [])
        , (Just "monads-tf", "Control.Monad.Trans", Nothing, [])
        , (Just "monads-tf", "Control.Monad.Writer", Nothing, [])
        , (Just "monads-tf", "Control.Monad.Writer.Class", Nothing, [])
+       , (Just "process", "System.Process", Just "Process", [])
        , (Just "regex-with-pcre", "Text.RE.PCRE.Text", Nothing, [])
+       , (Just "regex-with-pcre", "Text.RE.PCRE.Text", Just "PCRE", [])
        , (Just "split", "Data.List.Split", Just "Split", [])
        , (Just "text", "Data.Text", Nothing, ["elem", "filter", "length", "map"])
        , (Just "text", "Data.Text", Just "Text", [])

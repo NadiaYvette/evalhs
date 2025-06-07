@@ -131,3 +131,26 @@ extra-deps:
   - prettyprinter-ansi-terminal-1.1.3
   # ARGH!!!
   - composition-1.0.2.2
+  # AAAARRRRGGHH!!!!!!
+  - clock-0.8.4
+  # AAAAAAAARRRRRRRRGGGGGGGGHHHHHHHH!!!!!!
+  - aeson-2.2.3.0
+  - nonempty-vector-0.2.4
+  # AAAAAAAARRRRRRRRGGGGGGGGHHHHHHHH!!!!!!
+  - QuickCheck-2.15.0.1
+  - character-ps-0.1
+  - data-fix-0.3.4
+  - dlist-1.0
+  - generically-0.1.1
+  - integer-conversion-0.1.1
+  - integer-logarithms-1.0.4
+  - network-uri-2.6.4.2
+  - scientific-0.3.8.0
+  - semialign-1.3.1
+  - text-iso8601-0.1.1
+  - text-short-0.1.6
+  - time-compat-1.9.8
+  - uuid-types-1.0.6
+  - witherable-0.5
+  # AAAAAAAARRRRRRRRGGGGGGGGHHHHHHHH!!!!!!
+  - th-compat-0.1.6
