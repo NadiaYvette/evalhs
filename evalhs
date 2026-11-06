@@ -40,6 +40,7 @@ pkgs = [ "assoc"
        , "kan-extensions"
        , "lens"
        , "monads-tf"
+       , "mono-traversable"
        , "nonempty-containers"
        , "parallel"
        , "parsec"
@@ -57,7 +58,8 @@ pkgs = [ "assoc"
        , "time"
        , "transformers-compat"
        , "unix"
-       , "vector" ]
+       , "vector"
+       , "witherable" ]
   & List.nub
   & concatMap \s -> ["--package", s]
 
@@ -133,11 +135,15 @@ imps = [ (Just "base", "Control.Applicative", Nothing, [])
        , (Just "base", "Control.Arrow", Nothing, [])
        , (Just "base", "Control.Monad", Nothing, [])
        , (Just "base", "Control.Monad", Just "Monad", [])
+       , (Just "base", "Control.Monad.IO.Class", Nothing, [])
+       , (Just "base", "Control.Monad.IO.Class", Just "Monad", [])
        , (Just "base", "Data.Char", Just "Char", [])
        , (Just "base", "Data.Functor", Nothing, [])
        , (Just "base", "Data.Either", Nothing, [])
        , (Just "base", "Data.Foldable", Nothing, [])
+       , (Just "base", "Data.Foldable", Just "Fold", [])
        , (Just "base", "Data.Foldable1", Nothing, [])
+       , (Just "base", "Data.Foldable1", Just "Fold", [])
        , (Just "base", "Data.Function", Nothing, [])
        , (Just "base", "Data.Kind", Nothing, [])
        , (Just "base", "Data.List", Nothing, ["elem", "intercalate", "length", "lines", "words"])
@@ -146,11 +152,14 @@ imps = [ (Just "base", "Control.Applicative", Nothing, [])
        , (Just "base", "Data.List.NonEmpty", Just "NonEmpty", [])
        , (Just "base", "Data.Maybe", Nothing, [])
        , (Just "base", "Data.Maybe", Just "Maybe", [])
+       , (Just "base", "System.IO", Just "IO", [])
        , (Just "composition-extra", "Data.Function.Syntax", Nothing, [])
        , (Just "composition-extra", "Data.Functor.Syntax", Nothing, [])
        , (Just "extra", "Control.Monad.Extra", Just "Monad", [])
        , (Just "extra", "Data.Either.Extra", Just "Either", [])
        , (Just "extra", "Data.Foldable.Extra", Nothing, [])
+       , (Just "extra", "Data.Foldable.Extra", Just "Fold", [])
+       , (Just "extra", "Data.Tuple.Extra", Just "Tuple", [])
        , (Just "filepath", "System.FilePath", Just "FilePath", [])
        , (Just "containers", "Data.Graph", Just "Graph", [])
        , (Just "containers", "Data.Map", Just "Map", [])
@@ -178,8 +187,8 @@ imps = [ (Just "base", "Control.Applicative", Nothing, [])
        , (Just "monads-tf", "Control.Monad.RWS.Class", Just "RWS", [])
        , (Just "monads-tf", "Control.Monad.Reader", Nothing, [])
        , (Just "monads-tf", "Control.Monad.Reader.Class", Nothing, [])
-       , (Just "monads-tf", "Control.Monad.State", Nothing, [])
-       , (Just "monads-tf", "Control.Monad.State.Class", Nothing, [])
+       , (Just "monads-tf", "Control.Monad.State", Just "State", [])
+       , (Just "monads-tf", "Control.Monad.State.Class", Just "State", [])
        , (Just "monads-tf", "Control.Monad.Trans", Nothing, [])
        , (Just "monads-tf", "Control.Monad.Writer", Nothing, [])
        , (Just "monads-tf", "Control.Monad.Writer.Class", Nothing, [])
@@ -190,7 +199,13 @@ imps = [ (Just "base", "Control.Applicative", Nothing, [])
        , (Just "text", "Data.Text", Nothing, ["elem", "filter", "length", "map"])
        , (Just "text", "Data.Text", Just "Text", [])
        , (Just "text", "Data.Text.IO", Nothing, [])
-       , (Just "text", "Data.Text.IO", Just "Text", [])]
+       , (Just "text", "Data.Text.IO", Just "Text", [])
+       , (Just "mono-traversable", "Data.Containers", Just "Mono", [])
+       , (Just "mono-traversable", "Data.MonoTraversable", Just "Mono", [])
+       , (Just "mono-traversable", "Data.NonNull", Just "Mono", [])
+       , (Just "mono-traversable", "Data.Sequences", Just "Mono", [])
+       , (Just "witherable", "Witherable", Just "Wither", [])
+       , (Just "witherable", "Witherable", Nothing, ["Filterable", "FilterableWithIndex", "Witherable", "WitherableWithIndex", "WrappedFoldable", "(<$?>)", "(<&?>)"])]
   <&> \t4@(_, _, _, _) -> "-e \'" <> unwords (mkImp t4) <> "\'"
 
 debug :: Bool
